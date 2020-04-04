@@ -204,9 +204,15 @@ request = async (opts) => {
 				}
 
 				// Parse JSON if needed
-				let body = data
+				let body = data;
+				let parsingError = false;
 				if (opts.json) {
-					body = JSON.parse(data)
+					try {
+						body = JSON.parse(data);
+					} catch(e) {
+						body = data;
+						parsingError = true;
+					}
 				}
 
 				// Create request.js similar-style response
@@ -225,8 +231,11 @@ request = async (opts) => {
 					Object.assign(response, additionalInfoObject);
 				}
 
+				if(opts.json !== undefined)
+					response['parsingError'] = parsingError;
+
 				this.close();
-				resolve(response)
+				resolve(response);
 			});
 
 			curl.on('error', function (err) {
